@@ -1,0 +1,97 @@
+# Semantic-4DGS-Traffic Configuration
+
+# Model Architecture
+model:
+  num_gaussians: 100000
+  num_dynamic_gaussians: 50000
+  feature_dim: 32
+  num_semantic_classes: 20
+  
+# Static Field (Items 18-22)
+static_field:
+  use_gis_prior: true
+  use_sky_ground_sep: true
+  density_control:
+    threshold_split: 0.5
+    threshold_clone: 0.1
+    threshold_prune: 0.01
+  temporal_window: 5
+  consistency_weight: 0.1
+  
+# Non-Rigid Deformation (Items 23-26)
+deformation:
+  hidden_dim: 128
+  num_bones: 16
+  stiffness_weight: 0.5
+  temporal_weight: 0.1
+  reg_weight: 0.01
+  use_skeleton_prior: true
+  
+# SAM2 Tracker (Items 27-31)
+sam2_tracker:
+  sam2_model_path: null  # Will use default SAM2
+  feature_dim: 256
+  memory_size: 100
+  consistency_weight: 0.1
+  reid_threshold: 0.7
+  auto_prompt: true
+  
+# Point Tracker (Items 32-34)
+point_tracker:
+  tracking_window: 30
+  confidence_threshold: 0.5
+  max_objects: 50
+  anomaly_detection:
+    z_threshold: 3.0
+    velocity_threshold: 10.0
+    acceleration_threshold: 20.0
+    
+# Renderer (Items 35-36)
+renderer:
+  image_height: 540
+  image_width: 960
+  gaussian_scale_threshold: 0.01
+  background_color: [0.0, 0.0, 0.0]
+  semantic_rendering:
+    use_feature_distance: true
+    feature_weight: 0.5
+  silhouette:
+    method: alpha_edge
+    edge_threshold: 0.5
+    
+# Training
+training:
+  max_iterations: 30000
+  batch_size: 1
+  learning_rate:
+    base: 1.0e-4
+    positions: 1.0e-4
+    features: 1.0e-3
+    deformation: 1.0e-4
+    
+  losses:
+    rgb_weight: 1.0
+    depth_weight: 0.5
+    semantic_weight: 0.3
+    silhouette_weight: 0.2
+    temporal_consistency_weight: 0.1
+    stiffness_weight: 0.1
+    deformation_reg_weight: 0.01
+    
+  progressive_densification:
+    start_iteration: 500
+    end_iteration: 20000
+    densify_interval: 100
+    
+# Datasets
+datasets:
+  train:
+    type: waymo
+    root: /data/waymo
+    sequence_length: 8
+    sample_interval: 2
+    
+  val:
+    type: waymo
+    root: /data/waymo_val
+    sequence_length: 8
